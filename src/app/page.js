@@ -3,6 +3,8 @@ import styles from "./page.module.css";
 
 export default function Home() {
   return (
-   <div>Hello world</div>
+   <div>
+    <h1>MovieFlix</h1>
+   </div>
   );
 }
