@@ -2,12 +2,28 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import styles from "./page.module.css";
-import { getGenres } from "@/utils/api";
-
+import { getGenres, getMoviesByGenreIds } from "@/utils/api";
+import { MovieDetails } from "./components/MovieDetails";
 export default function Home() {
   const [loading, setLoading] = useState(true);
   const [genres, setGenres] = useState([]);
   const [selectedGenre, setSelectedGenre] = useState("");
+  const [movies, setMovies] = useState([]);
+
+  const handleChange = (e) => {
+    setSelectedGenre(e.target.value);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    console.log(typeof selectedGenre);
+    try {
+      const movieData = await getMoviesByGenreIds({ genreIds: selectedGenre });
+      setMovies(movieData);
+    } catch (error) {
+      console.log("Error getting movie by ids", error);
+    }
+  };
 
   useEffect(() => {
     const loadGenres = async () => {
@@ -22,7 +38,6 @@ export default function Home() {
     loadGenres();
   }, []);
 
-  // console.log('selected genre', selectedGenre)
   return (
     <div>
       <div className="heading">
@@ -31,10 +46,11 @@ export default function Home() {
       <div>
         <h2>Find movies you want to see</h2>
       </div>
-      <div>
+      <form onSubmit={handleSubmit}>
         <p>Find Movies by Genre</p>
         {genres?.length > 1 ? (
-          <select>
+          <select value={selectedGenre} onChange={handleChange}>
+            <option value="">--Please choose a genre--</option>
             {genres.map((genre) => (
               <option key={genre.id} value={genre.id}>
                 {genre.name}
@@ -42,9 +58,20 @@ export default function Home() {
             ))}
           </select>
         ) : (
-          <div>loading </div>
+          <div>loading</div>
         )}
-      </div>
+        <button type="submit" value="submit">
+          Submit
+        </button>
+      </form>
+
+      {movies && movies.length > 0 && (
+        <div>
+          {movies.map((movie, i) => (
+            <MovieDetails key={i} movie={movie} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
